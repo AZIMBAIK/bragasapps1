@@ -1,4 +1,4 @@
-# bragasapps1
+# Bragas Hiking mobile application
 
 A new Flutter project.
 
