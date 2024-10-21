@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1022138671308",
+    "project_id": "bragasapp1",
+    "storage_bucket": "bragasapp1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022138671308:android:e21735b4e86c1b0bd4a269",
+        "android_client_info": {
+          "package_name": "com.hai.bragasapps1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOegdtqFeWqPP5vYpKBaRR8g-AiJwQ9fg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

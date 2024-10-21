@@ -1,0 +1,185 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class UserTable extends StatefulWidget {
+  @override
+  _UserTableState createState() => _UserTableState();
+}
+
+class _UserTableState extends State<UserTable> {
+  late List<Map<String, dynamic>> userData;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+    setState(() {
+      userData = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    });
+  }
+
+  void deleteUser(String uid) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+    fetchUserData();
+  }
+
+  void updateUser(String uid, Map<String, dynamic> newData) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).update(newData);
+    fetchUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+       appBar: AppBar(
+      centerTitle: true, // Align the title text to the center
+      title: Text(
+        'User Table',
+        style: TextStyle(fontWeight: FontWeight.bold), // Make the title text bold
+      ),
+       ),
+      body: userData == null
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: 20.0,
+                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.blue[200]!),
+                headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                dataRowHeight: 56.0,
+                columns: [
+                  DataColumn(label: Text('Email')),
+                  DataColumn(label: Text('Name')),
+                  DataColumn(label: Text('Password')),
+                  DataColumn(label: Text('Address')),
+                  DataColumn(label: Text('Phone')),
+                  DataColumn(label: Text('Profile Image Path')),
+                  DataColumn(label: Text('Role')),
+                  DataColumn(label: Text('UID')),
+                  DataColumn(label: Text('Actions')), // Add column for actions
+                ],
+                rows: userData.map((data) {
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(data['email'] ?? '')),
+                      DataCell(Text(data['name'] ?? '')),
+                      DataCell(Text(data['password'] ?? '')),
+                      DataCell(Text(data['address'] ?? ''),),
+                      DataCell(Text(data['phone'] ?? '')),
+                      DataCell(Text(data['profileImagePath'] ?? '')),
+                      DataCell(Text(data['role'] ?? '')),
+                      DataCell(Text(data['uid'] ?? '')),
+                      DataCell(
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                             onPressed: () {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      TextEditingController emailController = TextEditingController(text: data['email'] ?? '');
+      TextEditingController nameController = TextEditingController(text: data['name'] ?? '');
+      TextEditingController passwordController = TextEditingController(text: data['password'] ?? '');
+      TextEditingController addressController = TextEditingController(text: data['address'] ?? '');
+      TextEditingController phoneController = TextEditingController(text: data['phone'] ?? '');
+      TextEditingController profileImagePathController = TextEditingController(text: data['profileImagePath'] ?? '');
+      TextEditingController roleController = TextEditingController(text: data['role'] ?? '');
+
+      return AlertDialog(
+        title: Text('Edit User'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
+                controller: emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+              ),
+              TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Name'),
+              ),
+              TextFormField(
+                controller: passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+              ),
+              TextFormField(
+                controller: addressController,
+                decoration: InputDecoration(labelText: 'Address'),
+              ),
+              TextFormField(
+                controller: phoneController,
+                decoration: InputDecoration(labelText: 'Phone'),
+              ),
+              TextFormField(
+                controller: profileImagePathController,
+                decoration: InputDecoration(labelText: 'Profile Image Path'),
+              ),
+              TextFormField(
+                controller: roleController,
+                decoration: InputDecoration(labelText: 'Role'),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Get updated data from controllers
+              Map<String, dynamic> updatedData = {
+                'email': emailController.text,
+                'name': nameController.text,
+                'password': passwordController.text,
+                'address': addressController.text,
+                'phone': phoneController.text,
+                'profileImagePath': profileImagePathController.text,
+                'role': roleController.text,
+              };
+              
+              // Update user data in Firestore
+              updateUser(data['uid'], updatedData);
+
+              // Close the dialog
+              Navigator.of(context).pop();
+            },
+            child: Text('Save'),
+          ),
+        ],
+      );
+    },
+  );
+},
+
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                // Implement delete action
+                                deleteUser(data['uid']);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+    );
+  }
+}
+
+
